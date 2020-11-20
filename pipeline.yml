@@ -10,6 +10,11 @@ resources:
     source:
       uri: https://github.com/Zebreus/pruefungsplaner.git
       branch: master
+  - name: pruefungsplaner-scheduler
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-scheduler.git
+      branch: master
   - name: qt-webassembly
     type: registry-image
     source:
@@ -92,4 +97,18 @@ jobs:
       - put: pruefungsplaner-frontend-latest
         params:
           image: image/image.tar
+  - name: test-scheduler
+    public: false
+    plan:
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: qt5-builder
+      - task: build-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task_build_tests.yml
+        image: qt5-builder
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task_run_tests.yml
+        image: qt5-builder
   
