@@ -64,6 +64,8 @@ jobs:
     plan:
       - get: pruefungsplaner-frontend
         trigger: true
+      - get: pruefungsplaner-meta
+        trigger: true
       - get: qt-webassembly
       - get: oci-build-task
       - task: build-frontend
@@ -72,8 +74,21 @@ jobs:
         privileged: true
       - task: build-task-image
         privileged: true
-        file: pruefungsplaner-frontend/concourse/task-build-container.yml
         image: oci-build-task
+        config:
+          platform: linux
+          inputs:
+            - name: built-frontend
+              path: frontend
+              optional: false
+            - name: pruefungsplaner-frontend
+              optional: false
+          params:
+            DOCKERFILE: ./pruefungsplaner-meta/frontend/Dockerfile
+          outputs:
+            - name: image
+          run:
+            path: build
       - put: pruefungsplaner-frontend-latest
         params:
           image: image/image.tar
