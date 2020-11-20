@@ -81,7 +81,7 @@ jobs:
             - name: built-frontend
               path: frontend
               optional: false
-            - name: pruefungsplaner-frontend
+            - name: pruefungsplaner-meta
               optional: false
           params:
             DOCKERFILE: ./pruefungsplaner-meta/frontend/Dockerfile
