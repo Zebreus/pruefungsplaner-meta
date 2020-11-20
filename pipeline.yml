@@ -15,6 +15,11 @@ resources:
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-scheduler.git
       branch: master
+  - name: pruefungsplaner-backend
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-backend.git
+      branch: master
   - name: qt-webassembly
     type: registry-image
     source:
@@ -31,6 +36,13 @@ resources:
     type: registry-image
     source:
       repository: ((registry_username))/pruefungsplaner-scheduler
+      username: ((registry_username))
+      password: ((registry_password))
+      tag: latest
+  - name: pruefungsplaner-backend-latest
+    type: registry-image
+    source:
+      repository: ((registry_username))/pruefungsplaner-backend
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -151,5 +163,54 @@ jobs:
           run:
             path: build
       - put: pruefungsplaner-scheduler-latest
+        params:
+          image: image/image.tar
+  - name: test-backend
+    public: false
+    plan:
+      - get: pruefungsplaner-backend
+        trigger: true
+      - get: qt5-builder
+      - task: build-tests
+        privileged: true
+        file: pruefungsplaner-backend/concourse/task_build_tests.yml
+        image: qt5-builder
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        image: qt5-builder
+  - name: build-backend-container
+    public: false
+    plan:
+      - get: pruefungsplaner-backend
+        passed: [test-backend]
+        trigger: true
+      - get: pruefungsplaner-meta
+        trigger: true
+      - get: qt5-builder
+      - get: oci-build-task
+      - task: build-backend
+        file: pruefungsplaner-backend/concourse/task_build.yml
+        image: qt5-builder
+        privileged: true
+      - task: build-task-image
+        privileged: true
+        image: oci-build-task
+        config:
+          platform: linux
+          inputs:
+            - name: built-backend
+              optional: false
+            - name: pruefungsplaner-meta
+              optional: false
+          params:
+            DOCKERFILE: ./pruefungsplaner-meta/backend/Dockerfile
+          outputs:
+            - name: image
+          caches:
+            - path: cache
+          run:
+            path: build
+      - put: pruefungsplaner-backend-latest
         params:
           image: image/image.tar
