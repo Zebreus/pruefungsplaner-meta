@@ -5,6 +5,11 @@ resources:
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-meta.git
       branch: master
+  - name: pruefungsplaner-datamodel
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-datamodel.git
+      branch: master
   - name: pruefungsplaner-frontend
     type: git
     source:
@@ -116,6 +121,20 @@ jobs:
       - put: pruefungsplaner-frontend-latest
         params:
           image: image/image.tar
+  - name: test-datamodel
+    public: false
+    plan:
+      - get: pruefungsplaner-datamodel
+        trigger: true
+      - get: qt5-builder
+      - task: build-tests
+        privileged: true
+        file: pruefungsplaner-datamodel/concourse/task_build_tests.yml
+        image: qt5-builder
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-datamodel/concourse/task_run_tests.yml
+        image: qt5-builder
   - name: test-scheduler
     public: false
     plan:
