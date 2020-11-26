@@ -1,0 +1,21 @@
+[server]
+#The adress on which the server should be listening
+address = "0.0.0.0"
+#The port on which the server should be listening
+port = 9092
+
+[security]
+#The server signs the generated token with this key
+#If there is no key when starting the program an empty one is returned
+privateKey = "myres/private_key.pem"
+publicKey = "myres/public_key.pem"
+
+[[user]]
+username = "test"
+password = "test"
+claims = ["pruefungsplanerRead", "pruefungsplanerWrite"]
+
+[[user]]
+username = "user2"
+password = "pass2"
+claims = ["alpha", "beta", "gamma"]

@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+
+  auth:
+    image: madmanfred/pruefungsplaner-auth
+    ports:
+      - 9092:80
+    volumes:
+      - ./:/data
+    command: --private-key /data/private_key.pem  --public-key /data/public_key.pem  --config /data/config.toml
+    restart: unless-stopped
+    
+  backend:
+    image: madmanfred/pruefungsplaner-backend
+    ports:
+      - 9093:80
+    volumes:
+      - ./:/data
+    command: --public-key /data/public_key.pem 
+    restart: unless-stopped
+
+  frontend:
+    image: madmanfred/pruefungsplaner-frontend
+    ports:
+      - 80:80
+    restart: unless-stopped
