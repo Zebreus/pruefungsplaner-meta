@@ -25,6 +25,11 @@ resources:
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-backend.git
       branch: master
+  - name: pruefungsplaner-auth
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-auth.git
+      branch: master
   - name: qt-webassembly
     type: registry-image
     source:
@@ -48,6 +53,13 @@ resources:
     type: registry-image
     source:
       repository: ((registry_username))/pruefungsplaner-backend
+      username: ((registry_username))
+      password: ((registry_password))
+      tag: latest
+  - name: pruefungsplaner-auth-latest
+    type: registry-image
+    source:
+      repository: ((registry_username))/pruefungsplaner-auth
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -231,5 +243,18 @@ jobs:
           run:
             path: build
       - put: pruefungsplaner-backend-latest
+        params:
+          image: image/image.tar
+  - name: build-auth-container
+    public: false
+    plan:
+      - get: pruefungsplaner-auth
+        trigger: true
+      - get: oci-build-task
+      - task: build-auth-image
+        file: pruefungsplaner-auth/concourse/task_build_container.yml
+        privileged: true
+        image: oci-build-task
+      - put: pruefungsplaner-auth-latest
         params:
           image: image/image.tar
