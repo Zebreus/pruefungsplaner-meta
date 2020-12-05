@@ -38,13 +38,13 @@ run:
       exit 1
     fi
     
-    difference=0
+    difference=-1
     SUBMODULE_LOCATION=${SUBMODULE_LOCATION:-}
     while test -z "${SUBMODULE_LOCATION}"
     do
+      difference=$((difference+1))
       commit_hash=$(git -C "${SUBMODULE_REPO}" rev-parse HEAD~${difference})
       SUBMODULE_LOCATION=$(git -C "${TARGET_REPO}" submodule status | grep "${commit_hash}" | cut -d' ' -f3)
-      difference=$((difference+1))
     done
     
     if test 0 -eq ${difference}
