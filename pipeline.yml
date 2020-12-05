@@ -37,8 +37,9 @@ resources:
   - name: pruefungsplaner-backend
     type: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-backend.git
+      uri: git@github.com:Zebreus/pruefungsplaner-backend.git
       branch: master
+      private_key: ((github_private_key))
   - name: pruefungsplaner-auth
     type: git
     source:
@@ -119,32 +120,12 @@ jobs:
     plan:
       - get: pruefungsplaner-frontend
         trigger: true
-      - get: pruefungsplaner-meta
       - get: qt-webassembly
       - get: oci-build-task
-      - task: build-frontend
-        file: pruefungsplaner-frontend/concourse/task-build-wasm.yml
-        image: qt-webassembly
-        privileged: true
-      - task: build-task-image
+      - task: build-frontend-image
+        file: pruefungsplaner-frontend/concourse/task_build_container.yml
         privileged: true
         image: oci-build-task
-        config:
-          platform: linux
-          inputs:
-            - name: built-frontend
-              path: frontend
-              optional: false
-            - name: pruefungsplaner-meta
-              optional: false
-          params:
-            DOCKERFILE: ./pruefungsplaner-meta/frontend/Dockerfile
-          outputs:
-            - name: image
-          caches:
-            - path: cache
-          run:
-            path: build
       - put: pruefungsplaner-frontend-latest
         params:
           image: image/image.tar
@@ -226,6 +207,51 @@ jobs:
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
         image: qt5-builder
+  - name: test-datamodel-backend-compatibility
+    disable_manual_trigger: true
+    plan:
+      - get: pruefungsplaner-datamodel
+        passed: [test-datamodel]
+        trigger: true
+      - get: pruefungsplaner-backend
+        trigger: true
+      - get: qt5-builder
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-datamodel
+          target: pruefungsplaner-backend
+        output_mapping:
+          updated-target: pruefungsplaner-backend
+      - task: build-tests
+        privileged: true
+        file: pruefungsplaner-backend/concourse/task_build_tests.yml
+        image: qt5-builder
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        image: qt5-builder
+  - name: integrate-datamodel
+    disable_manual_trigger: true
+    public: false
+    plan:
+      - get: pruefungsplaner-backend
+        passed: [test-datamodel-backend-compatibility]
+        trigger: false
+      - get: pruefungsplaner-datamodel
+        passed: [test-datamodel-backend-compatibility]
+        trigger: true
+      - get: qt5-builder
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-datamodel
+          target: pruefungsplaner-backend
+      - put: pruefungsplaner-backend
+        params:
+          repository: updated-target
   - name: build-backend-container
     public: false
     plan:
