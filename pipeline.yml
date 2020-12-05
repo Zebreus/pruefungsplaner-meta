@@ -5,6 +5,20 @@ resources:
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-meta.git
       branch: master
+  - name: pruefungsplaner-meta-qt5-builder
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-meta.git
+      branch: master
+      paths: 
+        - qt5-builder/Dockerfile
+  - name: pruefungsplaner-meta-scheduler
+    type: git
+    source:
+      uri: https://github.com/Zebreus/pruefungsplaner-meta.git
+      branch: master
+      paths:
+        - scheduler/Dockerfile
   - name: pruefungsplaner-datamodel
     type: git
     source:
@@ -80,6 +94,7 @@ jobs:
     public: true
     plan:
       - get: pruefungsplaner-meta
+        resource: pruefungsplaner-meta-qt5-builder
         trigger: true
       - get: oci-build-task
       - task: build-qt5
@@ -168,6 +183,7 @@ jobs:
         passed: [test-scheduler]
         trigger: true
       - get: pruefungsplaner-meta
+        resource: pruefungsplaner-meta-scheduler
         trigger: true
       - get: qt5-builder
       - get: oci-build-task
