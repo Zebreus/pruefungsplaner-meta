@@ -1,0 +1,71 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: alpine/git
+
+params:
+  SUBMODULE_REPO: submodule
+  TARGET_REPO: target
+
+inputs:
+  - name: submodule
+  - name: target
+
+outputs:
+  - name: updated-target
+    path: target
+
+run:
+  path: /bin/sh
+  args:
+  - -c
+  - |
+    #!/bin/sh
+    set -eux
+    
+    if ! test -d "${SUBMODULE_REPO}" && git -C "${SUBMODULE_REPO}" rev-parse
+    then
+      printf 'SUBMODULE_REPO not specified or invalid\n' >&2
+      exit 1
+    fi
+    
+    if ! test -d "${TARGET_REPO}" && git -C "${TARGET_REPO}" rev-parse
+    then
+      printf 'TARGET_REPO not specified or invalid\n' >&2
+      exit 1
+    fi
+    
+    difference=0
+    SUBMODULE_LOCATION=${SUBMODULE_LOCATION:-}
+    while test -z "${SUBMODULE_LOCATION}"
+    do
+      commit_hash=$(git -C "${SUBMODULE_REPO}" rev-parse HEAD~${difference})
+      SUBMODULE_LOCATION=$(git -C "${TARGET_REPO}" submodule status | grep "${commit_hash}" | cut -d' ' -f3)
+      difference=$((difference+1))
+    done
+    
+    if test 0 -eq ${difference}
+    then
+      printf 'Submodule is already up to date\n'
+      exit 0
+    fi
+    
+    if ! test -d "${TARGET_REPO}/${SUBMODULE_LOCATION}" && git -C "${TARGET_REPO}/${SUBMODULE_LOCATION}" rev-parse
+    then
+      printf 'SUBMODULE_LOCATION not specified or invalid\n' >&2
+      exit 1
+    fi
+    
+    COMMIT_MESSAGE=${COMMIT_MESSAGE:-"Updated $(basename "$(git -C "${TARGET_REPO}/${SUBMODULE_LOCATION}" rev-parse --show-toplevel )" ) submodule"}
+    COMMIT_AUTHOR=${COMMIT_AUTHOR:-"concourse"}
+    COMMIT_EMAIL=${COMMIT_EMAIL:-"lennart@madmanfred.com"}
+    
+    git config --global user.name "$COMMIT_AUTHOR"
+    git config --global user.email "$COMMIT_EMAIL"
+    git -C "${TARGET_REPO}/${SUBMODULE_LOCATION}" pull --ff-only "$(pwd)/${SUBMODULE_REPO}" master
+    git -C "${TARGET_REPO}" add "${SUBMODULE_LOCATION}"
+    git -C "${TARGET_REPO}" commit -m "${COMMIT_MESSAGE}"
+
