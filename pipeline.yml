@@ -2,11 +2,13 @@
 resources:
   - name: pruefungsplaner-meta
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-meta.git
       branch: master
   - name: pruefungsplaner-meta-qt5-builder
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-meta.git
       branch: master
@@ -14,6 +16,7 @@ resources:
         - qt5-builder/Dockerfile
   - name: pruefungsplaner-meta-scheduler
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-meta.git
       branch: master
@@ -21,37 +24,44 @@ resources:
         - scheduler/Dockerfile
   - name: pruefungsplaner-datamodel
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-datamodel.git
       branch: master
   - name: pruefungsplaner-frontend
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner.git
       branch: master
   - name: pruefungsplaner-scheduler
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-scheduler.git
       branch: master
   - name: pruefungsplaner-backend
     type: git
+    icon: git
     source:
       uri: git@github.com:Zebreus/pruefungsplaner-backend.git
       branch: master
       private_key: ((github_private_key))
   - name: pruefungsplaner-auth
     type: git
+    icon: git
     source:
       uri: https://github.com/Zebreus/pruefungsplaner-auth.git
       branch: master
   - name: qt-webassembly
     type: registry-image
+    icon: docker
     source:
       repository: madmanfred/qt-webassembly
       tag: "qt5.15-em1.39.7"
   - name: pruefungsplaner-frontend-latest
     type: registry-image
+    icon: docker
     source:
       repository: ((registry_username))/pruefungsplaner-frontend
       username: ((registry_username))
@@ -59,6 +69,7 @@ resources:
       tag: latest
   - name: pruefungsplaner-scheduler-latest
     type: registry-image
+    icon: docker
     source:
       repository: ((registry_username))/pruefungsplaner-scheduler
       username: ((registry_username))
@@ -66,6 +77,7 @@ resources:
       tag: latest
   - name: pruefungsplaner-backend-latest
     type: registry-image
+    icon: docker
     source:
       repository: ((registry_username))/pruefungsplaner-backend
       username: ((registry_username))
@@ -73,6 +85,7 @@ resources:
       tag: latest
   - name: pruefungsplaner-auth-latest
     type: registry-image
+    icon: docker
     source:
       repository: ((registry_username))/pruefungsplaner-auth
       username: ((registry_username))
@@ -80,6 +93,7 @@ resources:
       tag: latest
   - name: qt5-builder
     type: registry-image
+    icon: docker
     source:
       repository: ((registry_username))/qt5-builder
       username: ((registry_username))
@@ -87,6 +101,7 @@ resources:
       tag: latest      
   - name: oci-build-task
     type: registry-image
+    icon: concourse-ci
     source:
       repository: vito/oci-build-task
 
