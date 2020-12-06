@@ -33,8 +33,9 @@ resources:
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner.git
+      uri: git@github.com:Zebreus/pruefungsplaner.git
       branch: master
+      private_key: ((github_frontend_key))
   - name: pruefungsplaner-scheduler
     type: git
     icon: git
@@ -159,11 +160,12 @@ jobs:
     public: false
     plan:
       - get: pruefungsplaner-frontend
+        passed: [test-frontend]
         trigger: true
       - get: qt-webassembly
       - get: oci-build-task
       - task: build-frontend-image
-        file: pruefungsplaner-frontend/concourse/task_build_container.yml
+        file: pruefungsplaner-frontend/concourse/task-build-container.yml
         privileged: true
         image: oci-build-task
       - put: pruefungsplaner-frontend-latest
@@ -202,6 +204,25 @@ jobs:
     plan:
       - get: pruefungsplaner-auth
         trigger: true
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-auth/concourse/task-test.yml
+  - name: test-frontend
+    public: false
+    plan:
+      - get: pruefungsplaner-frontend
+        trigger: true
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-frontend/concourse/task-test.yml
+  - name: test-qt-jsonrpc-server
+    public: false
+    plan:
+      - get: qt-jsonrpc-server
+        trigger: true
+      - task: run-tests
+        privileged: true
+        file: qt-jsonrpc-server/concourse/task-test.yml
   - name: build-scheduler-container
     public: false
     plan:
@@ -316,6 +337,7 @@ jobs:
     serial_groups: [integrate-backend]
     plan:
       - get: qt-jsonrpc-server
+        passed: [test-qt-jsonrpc-server]
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
@@ -367,6 +389,52 @@ jobs:
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
+  - name: integrate-datamodel-frontend
+    disable_manual_trigger: true
+    serial_groups: [integrate-frontend]
+    plan:
+      - get: pruefungsplaner-datamodel
+        passed: [test-datamodel]
+        trigger: true
+      - get: pruefungsplaner-frontend
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-datamodel
+          target: pruefungsplaner-frontend
+        output_mapping:
+          updated-target: pruefungsplaner-frontend
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-frontend/concourse/task-test.yml
+      - put: pruefungsplaner-frontend
+        params:
+          repository: pruefungsplaner-frontend
+  - name: integrate-auth-frontend
+    disable_manual_trigger: true
+    serial_groups: [integrate-frontend]
+    plan:
+      - get: pruefungsplaner-auth
+        passed: [test-auth]
+        trigger: true
+      - get: pruefungsplaner-frontend
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-auth
+          target: pruefungsplaner-frontend
+        output_mapping:
+          updated-target: pruefungsplaner-frontend
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-frontend/concourse/task-test.yml
+      - put: pruefungsplaner-frontend
+        params:
+          repository: pruefungsplaner-frontend
   - name: integrate-cpptoml-backend
     disable_manual_trigger: true
     serial_groups: [integrate-backend]
