@@ -54,8 +54,9 @@ resources:
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-auth.git
+      uri: git@github.com:Zebreus/pruefungsplaner-auth.git
       branch: master
+      private_key: ((github_auth_key))
   - name: qt-jsonrpc-server
     type: git
     icon: git
@@ -601,6 +602,73 @@ jobs:
       - put: pruefungsplaner-scheduler
         params:
           repository: pruefungsplaner-scheduler
+  - name: integrate-cpptoml-auth
+    disable_manual_trigger: true
+    serial_groups: [integrate-auth]
+    plan:
+      - get: cpptoml
+        trigger: true
+      - get: pruefungsplaner-auth
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: cpptoml
+          target: pruefungsplaner-auth
+        output_mapping:
+          updated-target: pruefungsplaner-auth
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-auth/concourse/task-test.yml
+      - put: pruefungsplaner-auth
+        params:
+          repository: pruefungsplaner-auth
+  - name: integrate-jwt-cpp-auth
+    disable_manual_trigger: true
+    serial_groups: [integrate-auth]
+    plan:
+      - get: qt-jwt-cpp
+        trigger: true
+      - get: pruefungsplaner-auth
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-jwt-cpp
+          target: pruefungsplaner-auth
+        output_mapping:
+          updated-target: pruefungsplaner-auth
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-auth/concourse/task-test.yml
+      - put: pruefungsplaner-auth
+        params:
+          repository: pruefungsplaner-auth
+  - name: integrate-jsonrpc-auth
+    disable_manual_trigger: true
+    serial_groups: [integrate-auth]
+    plan:
+      - get: qt-jsonrpc-server
+        passed: [test-qt-jsonrpc-server]
+        trigger: true
+      - get: pruefungsplaner-auth
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-jsonrpc-server
+          target: pruefungsplaner-auth
+        output_mapping:
+          updated-target: pruefungsplaner-auth
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-auth/concourse/task-test.yml
+      - put: pruefungsplaner-auth
+        params:
+          repository: pruefungsplaner-auth
   - name: build-backend-container
     public: false
     plan:
