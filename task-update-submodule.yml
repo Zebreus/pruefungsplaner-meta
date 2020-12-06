@@ -67,5 +67,6 @@ run:
     git config --global user.email "$COMMIT_EMAIL"
     git -C "${TARGET_REPO}/${SUBMODULE_LOCATION}" pull --ff-only "$(pwd)/${SUBMODULE_REPO}" master
     git -C "${TARGET_REPO}" add "${SUBMODULE_LOCATION}"
-    git -C "${TARGET_REPO}" commit -m "${COMMIT_MESSAGE}"
+    COMMIT_DATE="$(git -C "${SUBMODULE_SOURCE}" show -s --format=%ct HEAD)"
+    GIT_COMMITTER_DATE=${COMMIT_DATE} git -C "${TARGET_REPO}" commit --date ${COMMIT_DATE} -m "${COMMIT_MESSAGE}"
 
