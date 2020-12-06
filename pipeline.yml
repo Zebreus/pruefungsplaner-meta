@@ -215,6 +215,14 @@ jobs:
       - task: run-tests
         privileged: true
         file: qt-jsonrpc-server/concourse/task-test.yml
+  - name: test-qt-json-serialization
+    public: false
+    plan:
+      - get: qt-json-serialization
+        trigger: true
+      - task: run-tests
+        privileged: true
+        file: qt-json-serialization/concourse/task-test.yml
   - name: build-scheduler-container
     public: false
     plan:
@@ -460,6 +468,7 @@ jobs:
     serial_groups: [integrate-datamodel]
     plan:
       - get: qt-json-serialization
+        passed: [test-qt-json-serialization]
         trigger: true
       - get: pruefungsplaner-datamodel
         trigger: true
