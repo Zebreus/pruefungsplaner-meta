@@ -1,9 +1,5 @@
-FROM archlinux:latest
+FROM alpine:edge
 MAINTAINER Lennart E.
 
-#Install reflector to get the best mirrors later
-RUN pacman -Syu --noconfirm && pacman -S --noconfirm reflector
-
-#Install qt5, git and googletest
-RUN reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist && pacman -Sy && pacman -S --noconfirm base-devel git gtest gmock qt qt5
-
+RUN apk update && apk add build-base git gtest gmock qt5-qtbase-dev qt5-qtwebsockets-dev qt5-qtsvg-dev qt5-qtquickcontrols2-dev qt5-qttools-dev openssl
+ENV PATH="/usr/lib/qt5/bin/:${PATH}"
