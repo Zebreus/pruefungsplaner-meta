@@ -26,8 +26,9 @@ resources:
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-datamodel.git
+      uri: git@github.com:Zebreus/pruefungsplaner-datamodel.git
       branch: master
+      private_key: ((github_datamodel_key))
   - name: pruefungsplaner-frontend
     type: git
     icon: git
@@ -46,7 +47,7 @@ resources:
     source:
       uri: git@github.com:Zebreus/pruefungsplaner-backend.git
       branch: master
-      private_key: ((github_private_key))
+      private_key: ((github_backend_key))
   - name: pruefungsplaner-auth
     type: git
     icon: git
@@ -58,6 +59,12 @@ resources:
     icon: git
     source:
       uri: https://github.com/Zebreus/qt-jsonrpc-server.git
+      branch: master
+  - name: qt-json-serialization
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/Zebreus/qt-json-serialization.git
       branch: master
   - name: cpptoml
     type: git
@@ -388,6 +395,34 @@ jobs:
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
+  - name: integrate-serialization-datamodel
+    disable_manual_trigger: true
+    serial_groups: [integrate-datamodel]
+    plan:
+      - get: qt-json-serialization
+        trigger: true
+      - get: pruefungsplaner-datamodel
+        trigger: true
+      - get: qt5-builder
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-json-serialization
+          target: pruefungsplaner-datamodel
+        output_mapping:
+          updated-target: pruefungsplaner-datamodel
+      - task: build-tests
+        privileged: true
+        file: pruefungsplaner-datamodel/concourse/task_build_tests.yml
+        image: qt5-builder
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-datamodel/concourse/task_run_tests.yml
+        image: qt5-builder
+      - put: pruefungsplaner-datamodel
+        params:
+          repository: pruefungsplaner-datamodel
   - name: build-backend-container
     public: false
     plan:
