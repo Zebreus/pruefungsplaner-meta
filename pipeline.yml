@@ -22,13 +22,13 @@ resources:
       branch: master
       paths:
         - scheduler/Dockerfile
-  - name: pruefungsplaner-datamodel
+  - name: pruefungsplaner-backend
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-datamodel.git
+      uri: git@github.com:Zebreus/pruefungsplaner-backend.git
       branch: master
-      private_key: ((github_datamodel_key))
+      private_key: ((github_backend_key))
   - name: pruefungsplaner-frontend
     type: git
     icon: git
@@ -43,13 +43,6 @@ resources:
       uri: git@github.com:Zebreus/pruefungsplaner-scheduler.git
       branch: master
       private_key: ((github_frontend_key))
-  - name: pruefungsplaner-backend
-    type: git
-    icon: git
-    source:
-      uri: git@github.com:Zebreus/pruefungsplaner-backend.git
-      branch: master
-      private_key: ((github_backend_key))
   - name: pruefungsplaner-auth
     type: git
     icon: git
@@ -57,6 +50,13 @@ resources:
       uri: git@github.com:Zebreus/pruefungsplaner-auth.git
       branch: master
       private_key: ((github_auth_key))
+  - name: pruefungsplaner-datamodel
+    type: git
+    icon: git
+    source:
+      uri: git@github.com:Zebreus/pruefungsplaner-datamodel.git
+      branch: master
+      private_key: ((github_datamodel_key))
   - name: qt-jsonrpc-server
     type: git
     icon: git
@@ -69,17 +69,17 @@ resources:
     source:
       uri: https://github.com/Zebreus/qt-json-serialization.git
       branch: master
-  - name: cpptoml
-    type: git
-    icon: git
-    source:
-      uri: https://github.com/skystrife/cpptoml.git
-      branch: master
   - name: qt-jwt-cpp
     type: git
     icon: git
     source:
       uri: https://github.com/Zebreus/jwt-cpp.git
+      branch: master
+  - name: cpptoml
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/skystrife/cpptoml.git
       branch: master
   - name: qt-webassembly
     type: registry-image
@@ -87,6 +87,22 @@ resources:
     source:
       repository: madmanfred/qt-webassembly
       tag: "qt5.15-em1.39.7"
+  - name: qt5-builder
+    type: registry-image
+    icon: docker
+    source:
+      repository: ((registry_username))/qt5-builder
+      username: ((registry_username))
+      password: ((registry_password))
+      tag: latest     
+  - name: pruefungsplaner-backend-latest
+    type: registry-image
+    icon: docker
+    source:
+      repository: ((registry_username))/pruefungsplaner-backend
+      username: ((registry_username))
+      password: ((registry_password))
+      tag: latest
   - name: pruefungsplaner-frontend-latest
     type: registry-image
     icon: docker
@@ -103,14 +119,6 @@ resources:
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
-  - name: pruefungsplaner-backend-latest
-    type: registry-image
-    icon: docker
-    source:
-      repository: ((registry_username))/pruefungsplaner-backend
-      username: ((registry_username))
-      password: ((registry_password))
-      tag: latest
   - name: pruefungsplaner-auth-latest
     type: registry-image
     icon: docker
@@ -118,15 +126,7 @@ resources:
       repository: ((registry_username))/pruefungsplaner-auth
       username: ((registry_username))
       password: ((registry_password))
-      tag: latest
-  - name: qt5-builder
-    type: registry-image
-    icon: docker
-    source:
-      repository: ((registry_username))/qt5-builder
-      username: ((registry_username))
-      password: ((registry_password))
-      tag: latest      
+      tag: latest 
 
 jobs:
   - name: build-qt5-builder
@@ -155,27 +155,22 @@ jobs:
             path: build
       - put: qt5-builder
         params: {image: image/image.tar}
-  - name: build-frontend-container
+  - name: test-backend
     public: false
     plan:
-      - get: pruefungsplaner-frontend
-        passed: [test-frontend]
-        trigger: true
-      - get: qt-webassembly
-      - task: build-frontend-image
-        file: pruefungsplaner-frontend/concourse/task-build-container.yml
-        privileged: true
-      - put: pruefungsplaner-frontend-latest
-        params:
-          image: image/image.tar
-  - name: test-datamodel
-    public: false
-    plan:
-      - get: pruefungsplaner-datamodel
+      - get: pruefungsplaner-backend
         trigger: true
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-datamodel/concourse/task-test.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
+  - name: test-frontend
+    public: false
+    plan:
+      - get: pruefungsplaner-frontend
+        trigger: true
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-frontend/concourse/task-test.yml
   - name: test-scheduler
     public: false
     plan:
@@ -192,14 +187,14 @@ jobs:
       - task: run-tests
         privileged: true
         file: pruefungsplaner-auth/concourse/task-test.yml
-  - name: test-frontend
+  - name: test-datamodel
     public: false
     plan:
-      - get: pruefungsplaner-frontend
+      - get: pruefungsplaner-datamodel
         trigger: true
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-frontend/concourse/task-test.yml
+        file: pruefungsplaner-datamodel/concourse/task-test.yml
   - name: test-qt-jsonrpc-server
     public: false
     plan:
@@ -216,6 +211,31 @@ jobs:
       - task: run-tests
         privileged: true
         file: qt-json-serialization/concourse/task-test.yml
+  - name: build-backend-container
+    public: false
+    plan:
+      - get: pruefungsplaner-backend
+        passed: [test-backend]
+        trigger: true
+      - task: build-backend-image
+        file: pruefungsplaner-backend/concourse/task_build_container.yml
+        privileged: true
+      - put: pruefungsplaner-backend-latest
+        params:
+          image: image/image.tar
+  - name: build-frontend-container
+    public: false
+    plan:
+      - get: pruefungsplaner-frontend
+        passed: [test-frontend]
+        trigger: true
+      - get: qt-webassembly
+      - task: build-frontend-image
+        file: pruefungsplaner-frontend/concourse/task-build-container.yml
+        privileged: true
+      - put: pruefungsplaner-frontend-latest
+        params:
+          image: image/image.tar
   - name: build-scheduler-container
     public: false
     plan:
@@ -252,16 +272,41 @@ jobs:
       - put: pruefungsplaner-scheduler-latest
         params:
           image: image/image.tar
-  - name: test-backend
+  - name: build-auth-container
     public: false
     plan:
+      - get: pruefungsplaner-auth
+        passed: [test-auth]
+        trigger: true
+      - task: build-auth-image
+        file: pruefungsplaner-auth/concourse/task_build_container.yml
+        privileged: true
+      - put: pruefungsplaner-auth-latest
+        params:
+          image: image/image.tar
+  - name: integrate-cpptoml-backend
+    disable_manual_trigger: true
+    serial_groups: [integrate-backend]
+    plan:
+      - get: cpptoml
+        trigger: true
       - get: pruefungsplaner-backend
         trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: cpptoml
+          target: pruefungsplaner-backend
+        output_mapping:
+          updated-target: pruefungsplaner-backend
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task-test.yml
+      - put: pruefungsplaner-backend
+        params:
+          repository: pruefungsplaner-backend
   - name: integrate-datamodel-backend
-    old_name: test-datamodel-backend-compatibility
     serial_groups: [integrate-backend]
     disable_manual_trigger: true
     plan:
@@ -398,54 +443,6 @@ jobs:
       - put: pruefungsplaner-frontend
         params:
           repository: pruefungsplaner-frontend
-  - name: integrate-cpptoml-backend
-    disable_manual_trigger: true
-    serial_groups: [integrate-backend]
-    plan:
-      - get: cpptoml
-        trigger: true
-      - get: pruefungsplaner-backend
-        trigger: true
-      - get: pruefungsplaner-meta
-      - task: create-commit
-        file: pruefungsplaner-meta/task-update-submodule.yml
-        input_mapping:
-          submodule: cpptoml
-          target: pruefungsplaner-backend
-        output_mapping:
-          updated-target: pruefungsplaner-backend
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
-      - task: run-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
-      - put: pruefungsplaner-backend
-        params:
-          repository: pruefungsplaner-backend
-  - name: integrate-serialization-datamodel
-    disable_manual_trigger: true
-    serial_groups: [integrate-datamodel]
-    plan:
-      - get: qt-json-serialization
-        passed: [test-qt-json-serialization]
-        trigger: true
-      - get: pruefungsplaner-datamodel
-        trigger: true
-      - get: pruefungsplaner-meta
-      - task: create-commit
-        file: pruefungsplaner-meta/task-update-submodule.yml
-        input_mapping:
-          submodule: qt-json-serialization
-          target: pruefungsplaner-datamodel
-        output_mapping:
-          updated-target: pruefungsplaner-datamodel
-      - task: run-tests
-        privileged: true
-        file: pruefungsplaner-datamodel/concourse/task-test.yml
-      - put: pruefungsplaner-datamodel
-        params:
-          repository: pruefungsplaner-datamodel
   - name: integrate-cpptoml-scheduler
     disable_manual_trigger: true
     serial_groups: [integrate-scheduler]
@@ -626,27 +623,26 @@ jobs:
       - put: pruefungsplaner-auth
         params:
           repository: pruefungsplaner-auth
-  - name: build-backend-container
-    public: false
+  - name: integrate-serialization-datamodel
+    disable_manual_trigger: true
+    serial_groups: [integrate-datamodel]
     plan:
-      - get: pruefungsplaner-backend
-        passed: [test-backend]
+      - get: qt-json-serialization
+        passed: [test-qt-json-serialization]
         trigger: true
-      - task: build-backend-image
-        file: pruefungsplaner-backend/concourse/task_build_container.yml
-        privileged: true
-      - put: pruefungsplaner-backend-latest
-        params:
-          image: image/image.tar
-  - name: build-auth-container
-    public: false
-    plan:
-      - get: pruefungsplaner-auth
-        passed: [test-auth]
+      - get: pruefungsplaner-datamodel
         trigger: true
-      - task: build-auth-image
-        file: pruefungsplaner-auth/concourse/task_build_container.yml
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-json-serialization
+          target: pruefungsplaner-datamodel
+        output_mapping:
+          updated-target: pruefungsplaner-datamodel
+      - task: run-tests
         privileged: true
-      - put: pruefungsplaner-auth-latest
+        file: pruefungsplaner-datamodel/concourse/task-test.yml
+      - put: pruefungsplaner-datamodel
         params:
-          image: image/image.tar
+          repository: pruefungsplaner-datamodel
