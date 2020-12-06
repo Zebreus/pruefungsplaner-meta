@@ -646,3 +646,39 @@ jobs:
       - put: pruefungsplaner-datamodel
         params:
           repository: pruefungsplaner-datamodel
+
+groups:
+- name: build
+  jobs:
+  - test-backend
+  - test-frontend
+  - test-scheduler
+  - test-auth
+  - test-datamodel
+  - test-qt-jsonrpc-server
+  - test-qt-json-serialization
+  - build-backend-container
+  - build-frontend-container
+  - build-scheduler-container
+  - build-auth-container
+- name: integrate-submodules
+  jobs:
+  - integrate-cpptoml-backend
+  - integrate-datamodel-backend
+  - integrate-auth-backend
+  - integrate-jsonrpc-backend
+  - integrate-jwt-cpp-backend
+  - integrate-datamodel-frontend
+  - integrate-auth-frontend
+  - integrate-cpptoml-scheduler
+  - integrate-jwt-cpp-scheduler
+  - integrate-datamodel-scheduler
+  - integrate-jsonrpc-scheduler
+  - integrate-auth-scheduler
+  - integrate-cpptoml-auth
+  - integrate-jwt-cpp-auth
+  - integrate-jsonrpc-auth
+  - integrate-serialization-datamodel
+- name: meta
+  jobs:
+  - build-qt5-builder
