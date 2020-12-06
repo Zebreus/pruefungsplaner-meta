@@ -218,7 +218,7 @@ jobs:
         passed: [test-backend]
         trigger: true
       - task: build-backend-image
-        file: pruefungsplaner-backend/concourse/task_build_container.yml
+        file: pruefungsplaner-backend/concourse/task-build-container.yml
         privileged: true
       - put: pruefungsplaner-backend-latest
         params:
@@ -279,7 +279,7 @@ jobs:
         passed: [test-auth]
         trigger: true
       - task: build-auth-image
-        file: pruefungsplaner-auth/concourse/task_build_container.yml
+        file: pruefungsplaner-auth/concourse/task-build-container.yml
         privileged: true
       - put: pruefungsplaner-auth-latest
         params:
