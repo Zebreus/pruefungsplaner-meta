@@ -40,8 +40,9 @@ resources:
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-scheduler.git
+      uri: git@github.com:Zebreus/pruefungsplaner-scheduler.git
       branch: master
+      private_key: ((github_frontend_key))
   - name: pruefungsplaner-backend
     type: git
     icon: git
@@ -191,13 +192,9 @@ jobs:
       - get: pruefungsplaner-scheduler
         trigger: true
       - get: qt5-builder
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-scheduler/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-scheduler/concourse/task_run_tests.yml
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
         image: qt5-builder
   - name: test-auth
     public: false
@@ -491,6 +488,119 @@ jobs:
       - put: pruefungsplaner-datamodel
         params:
           repository: pruefungsplaner-datamodel
+  - name: integrate-cpptoml-scheduler
+    disable_manual_trigger: true
+    serial_groups: [integrate-scheduler]
+    plan:
+      - get: cpptoml
+        trigger: true
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: cpptoml
+          target: pruefungsplaner-scheduler
+        output_mapping:
+          updated-target: pruefungsplaner-scheduler
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
+      - put: pruefungsplaner-scheduler
+        params:
+          repository: pruefungsplaner-scheduler
+  - name: integrate-jwt-cpp-scheduler
+    disable_manual_trigger: true
+    serial_groups: [integrate-scheduler]
+    plan:
+      - get: qt-jwt-cpp
+        trigger: true
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-jwt-cpp
+          target: pruefungsplaner-scheduler
+        output_mapping:
+          updated-target: pruefungsplaner-scheduler
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
+      - put: pruefungsplaner-scheduler
+        params:
+          repository: pruefungsplaner-scheduler
+  - name: integrate-datamodel-scheduler
+    disable_manual_trigger: true
+    serial_groups: [integrate-scheduler]
+    plan:
+      - get: pruefungsplaner-datamodel
+        passed: [test-datamodel]
+        trigger: true
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-datamodel
+          target: pruefungsplaner-scheduler
+        output_mapping:
+          updated-target: pruefungsplaner-scheduler
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
+      - put: pruefungsplaner-scheduler
+        params:
+          repository: pruefungsplaner-scheduler
+  - name: integrate-jsonrpc-scheduler
+    disable_manual_trigger: true
+    serial_groups: [integrate-scheduler]
+    plan:
+      - get: qt-jsonrpc-server
+        passed: [test-qt-jsonrpc-server]
+        trigger: true
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: qt-jsonrpc-server
+          target: pruefungsplaner-scheduler
+        output_mapping:
+          updated-target: pruefungsplaner-scheduler
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
+      - put: pruefungsplaner-scheduler
+        params:
+          repository: pruefungsplaner-scheduler
+  - name: integrate-auth-scheduler
+    disable_manual_trigger: true
+    serial_groups: [integrate-scheduler]
+    plan:
+      - get: pruefungsplaner-auth
+        passed: [test-auth]
+        trigger: true
+      - get: pruefungsplaner-scheduler
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-auth
+          target: pruefungsplaner-scheduler
+        output_mapping:
+          updated-target: pruefungsplaner-scheduler
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-scheduler/concourse/task-test.yml
+      - put: pruefungsplaner-scheduler
+        params:
+          repository: pruefungsplaner-scheduler
   - name: build-backend-container
     public: false
     plan:
