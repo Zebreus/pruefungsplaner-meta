@@ -257,12 +257,9 @@ jobs:
     plan:
       - get: pruefungsplaner-backend
         trigger: true
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
   - name: integrate-datamodel-backend
     old_name: test-datamodel-backend-compatibility
     serial_groups: [integrate-backend]
@@ -281,12 +278,9 @@ jobs:
           target: pruefungsplaner-backend
         output_mapping:
           updated-target: pruefungsplaner-backend
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -307,12 +301,9 @@ jobs:
           target: pruefungsplaner-backend
         output_mapping:
           updated-target: pruefungsplaner-backend
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -333,12 +324,9 @@ jobs:
           target: pruefungsplaner-backend
         output_mapping:
           updated-target: pruefungsplaner-backend
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -358,12 +346,9 @@ jobs:
           target: pruefungsplaner-backend
         output_mapping:
           updated-target: pruefungsplaner-backend
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-backend/concourse/task_build_tests.yml
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-backend/concourse/task_run_tests.yml
+        file: pruefungsplaner-backend/concourse/task-test.yml
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
