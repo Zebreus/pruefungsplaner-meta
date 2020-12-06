@@ -178,15 +178,9 @@ jobs:
     plan:
       - get: pruefungsplaner-datamodel
         trigger: true
-      - get: qt5-builder
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-datamodel/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-datamodel/concourse/task_run_tests.yml
-        image: qt5-builder
+        file: pruefungsplaner-datamodel/concourse/task-test.yml
   - name: test-scheduler
     public: false
     plan:
@@ -469,7 +463,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-datamodel
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -478,14 +471,9 @@ jobs:
           target: pruefungsplaner-datamodel
         output_mapping:
           updated-target: pruefungsplaner-datamodel
-      - task: build-tests
-        privileged: true
-        file: pruefungsplaner-datamodel/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
-        file: pruefungsplaner-datamodel/concourse/task_run_tests.yml
-        image: qt5-builder
+        file: pruefungsplaner-datamodel/concourse/task-test.yml
       - put: pruefungsplaner-datamodel
         params:
           repository: pruefungsplaner-datamodel
