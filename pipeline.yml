@@ -127,11 +127,6 @@ resources:
       username: ((registry_username))
       password: ((registry_password))
       tag: latest      
-  - name: oci-build-task
-    type: registry-image
-    icon: concourse-ci
-    source:
-      repository: vito/oci-build-task
 
 jobs:
   - name: build-qt5-builder
@@ -140,11 +135,13 @@ jobs:
       - get: pruefungsplaner-meta
         resource: pruefungsplaner-meta-qt5-builder
         trigger: true
-      - get: oci-build-task
       - task: build-qt5
         privileged: true
-        image: oci-build-task
         config:
+          image_resource:
+            type: registry-image
+            source:
+              repository: vito/oci-build-task
           platform: linux
           params:
             DOCKERFILE: ./pruefungsplaner-meta/qt5-builder/Dockerfile
@@ -165,11 +162,9 @@ jobs:
         passed: [test-frontend]
         trigger: true
       - get: qt-webassembly
-      - get: oci-build-task
       - task: build-frontend-image
         file: pruefungsplaner-frontend/concourse/task-build-container.yml
         privileged: true
-        image: oci-build-task
       - put: pruefungsplaner-frontend-latest
         params:
           image: image/image.tar
@@ -186,11 +181,9 @@ jobs:
     plan:
       - get: pruefungsplaner-scheduler
         trigger: true
-      - get: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-scheduler/concourse/task-test.yml
-        image: qt5-builder
   - name: test-auth
     public: false
     plan:
@@ -232,16 +225,16 @@ jobs:
       - get: pruefungsplaner-meta
         resource: pruefungsplaner-meta-scheduler
         trigger: true
-      - get: qt5-builder
-      - get: oci-build-task
       - task: build-scheduler
         file: pruefungsplaner-scheduler/concourse/task_build_scheduler.yml
-        image: qt5-builder
         privileged: true
       - task: build-task-image
         privileged: true
-        image: oci-build-task
         config:
+          image_resource:
+            type: registry-image
+            source:
+              repository: vito/oci-build-task
           platform: linux
           inputs:
             - name: built-scheduler
@@ -264,15 +257,12 @@ jobs:
     plan:
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
   - name: integrate-datamodel-backend
     old_name: test-datamodel-backend-compatibility
     serial_groups: [integrate-backend]
@@ -283,7 +273,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -295,11 +284,9 @@ jobs:
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -312,7 +299,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -324,11 +310,9 @@ jobs:
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -341,7 +325,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -353,11 +336,9 @@ jobs:
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -369,7 +350,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -381,11 +361,9 @@ jobs:
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -443,7 +421,6 @@ jobs:
         trigger: true
       - get: pruefungsplaner-backend
         trigger: true
-      - get: qt5-builder
       - get: pruefungsplaner-meta
       - task: create-commit
         file: pruefungsplaner-meta/task-update-submodule.yml
@@ -455,11 +432,9 @@ jobs:
       - task: build-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_build_tests.yml
-        image: qt5-builder
       - task: run-tests
         privileged: true
         file: pruefungsplaner-backend/concourse/task_run_tests.yml
-        image: qt5-builder
       - put: pruefungsplaner-backend
         params:
           repository: pruefungsplaner-backend
@@ -672,11 +647,9 @@ jobs:
       - get: pruefungsplaner-backend
         passed: [test-backend]
         trigger: true
-      - get: oci-build-task
       - task: build-backend-image
         file: pruefungsplaner-backend/concourse/task_build_container.yml
         privileged: true
-        image: oci-build-task
       - put: pruefungsplaner-backend-latest
         params:
           image: image/image.tar
@@ -686,11 +659,9 @@ jobs:
       - get: pruefungsplaner-auth
         passed: [test-auth]
         trigger: true
-      - get: oci-build-task
       - task: build-auth-image
         file: pruefungsplaner-auth/concourse/task_build_container.yml
         privileged: true
-        image: oci-build-task
       - put: pruefungsplaner-auth-latest
         params:
           image: image/image.tar
