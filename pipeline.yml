@@ -42,7 +42,7 @@ resources:
     source:
       uri: git@github.com:Zebreus/pruefungsplaner-scheduler.git
       branch: master
-      private_key: ((github_frontend_key))
+      private_key: ((github_scheduler_key))
   - name: pruefungsplaner-auth
     type: git
     icon: git
