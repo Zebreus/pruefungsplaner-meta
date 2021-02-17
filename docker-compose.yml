@@ -18,9 +18,22 @@ services:
       - ./:/data
     command: --public-key /data/public_key.pem 
     restart: unless-stopped
+    
+  scheduler:
+    image: madmanfred/pruefungsplaner-scheduler
+    ports:
+      - 9094:80
+    volumes:
+      - ./:/data
+    command: --public-key /data/public_key.pem
+    restart: unless-stopped
 
   frontend:
     image: madmanfred/pruefungsplaner-frontend
     ports:
       - 80:80
     restart: unless-stopped
+    environment:
+      - AUTH_URL=ws://127.0.0.1:9092
+      - BACKEND_URL=ws://127.0.0.1:9093
+      - SCHEDULER_URL=ws://127.0.0.1:9094
