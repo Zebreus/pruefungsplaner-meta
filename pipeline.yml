@@ -14,14 +14,6 @@ resources:
       branch: master
       paths: 
         - qt5-builder/Dockerfile
-  - name: pruefungsplaner-meta-scheduler
-    type: git
-    icon: git
-    source:
-      uri: https://github.com/Zebreus/pruefungsplaner-meta.git
-      branch: master
-      paths:
-        - scheduler/Dockerfile
   - name: pruefungsplaner-backend
     type: git
     icon: git
@@ -242,33 +234,9 @@ jobs:
       - get: pruefungsplaner-scheduler
         passed: [test-scheduler]
         trigger: true
-      - get: pruefungsplaner-meta
-        resource: pruefungsplaner-meta-scheduler
-        trigger: true
-      - task: build-scheduler
-        file: pruefungsplaner-scheduler/concourse/task_build_scheduler.yml
+      - task: build-scheduler-image
+        file: pruefungsplaner-scheduler/concourse/task-build-container.yml
         privileged: true
-      - task: build-task-image
-        privileged: true
-        config:
-          image_resource:
-            type: registry-image
-            source:
-              repository: vito/oci-build-task
-          platform: linux
-          inputs:
-            - name: built-scheduler
-              optional: false
-            - name: pruefungsplaner-meta
-              optional: false
-          params:
-            DOCKERFILE: ./pruefungsplaner-meta/scheduler/Dockerfile
-          outputs:
-            - name: image
-          caches:
-            - path: cache
-          run:
-            path: build
       - put: pruefungsplaner-scheduler-latest
         params:
           image: image/image.tar
