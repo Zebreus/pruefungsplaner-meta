@@ -49,6 +49,13 @@ resources:
       uri: git@github.com:Zebreus/pruefungsplaner-datamodel.git
       branch: master
       private_key: ((github_datamodel_key))
+  - name: pruefungsplaner-cli
+    type: git
+    icon: git
+    source:
+      uri: git@github.com:Zebreus/pruefungsplaner-cli.git
+      branch: master
+      private_key: ((github_cli_key))
   - name: qt-jsonrpc-server
     type: git
     icon: git
@@ -116,6 +123,14 @@ resources:
     icon: docker
     source:
       repository: ((registry_username))/pruefungsplaner-auth
+      username: ((registry_username))
+      password: ((registry_password))
+      tag: latest
+  - name: pruefungsplaner-cli-latest
+    type: registry-image
+    icon: docker
+    source:
+      repository: ((registry_username))/pruefungsplaner-cli
       username: ((registry_username))
       password: ((registry_password))
       tag: latest 
@@ -203,6 +218,14 @@ jobs:
       - task: run-tests
         privileged: true
         file: qt-json-serialization/concourse/task-test.yml
+  - name: test-cli
+    public: false
+    plan:
+      - get: pruefungsplaner-cli
+        trigger: true
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-cli/concourse/task-test.yml
   - name: build-backend-container
     public: false
     plan:
@@ -250,6 +273,18 @@ jobs:
         file: pruefungsplaner-auth/concourse/task-build-container.yml
         privileged: true
       - put: pruefungsplaner-auth-latest
+        params:
+          image: image/image.tar
+  - name: build-cli-container
+    public: false
+    plan:
+      - get: pruefungsplaner-cli
+        passed: [test-cli]
+        trigger: true
+      - task: build-cli-image
+        file: pruefungsplaner-cli/concourse/task-build-container.yml
+        privileged: true
+      - put: pruefungsplaner-cli-latest
         params:
           image: image/image.tar
   - name: integrate-cpptoml-backend
@@ -625,10 +660,12 @@ groups:
   - test-datamodel
   - test-qt-jsonrpc-server
   - test-qt-json-serialization
+  - test-cli
   - build-backend-container
   - build-frontend-container
   - build-scheduler-container
   - build-auth-container
+  - build-cli-container
 - name: integrate-submodules
   jobs:
   - integrate-cpptoml-backend
