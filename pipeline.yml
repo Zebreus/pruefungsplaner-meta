@@ -4,13 +4,13 @@ resources:
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-meta.git
+      uri: ((github_meta_url))
       branch: master
   - name: pruefungsplaner-meta-qt5-builder
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/pruefungsplaner-meta.git
+      uri: ((github_meta_url))
       branch: master
       paths: 
         - qt5-builder/Dockerfile
@@ -18,67 +18,67 @@ resources:
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-backend.git
+      uri: ((git_backend_url))
       branch: master
       private_key: ((github_backend_key))
   - name: pruefungsplaner-frontend
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner.git
+      uri: ((git_frontend_url))
       branch: master
       private_key: ((github_frontend_key))
   - name: pruefungsplaner-scheduler
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-scheduler.git
+      uri: ((git_scheduler_url))
       branch: master
       private_key: ((github_scheduler_key))
   - name: pruefungsplaner-auth
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-auth.git
+      uri: ((git_auth_url))
       branch: master
       private_key: ((github_auth_key))
   - name: pruefungsplaner-datamodel
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-datamodel.git
+      uri: ((git_datamodel_url))
       branch: master
       private_key: ((github_datamodel_key))
   - name: pruefungsplaner-cli
     type: git
     icon: git
     source:
-      uri: git@github.com:Zebreus/pruefungsplaner-cli.git
+      uri: ((git_cli_url))
       branch: master
       private_key: ((github_cli_key))
   - name: qt-jsonrpc-server
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/qt-jsonrpc-server.git
+      uri: ((git_jsonrpc_server_url))
       branch: master
   - name: qt-json-serialization
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/qt-json-serialization.git
+      uri: ((git_json_serialization_url))
       branch: master
   - name: qt-jwt-cpp
     type: git
     icon: git
     source:
-      uri: https://github.com/Zebreus/jwt-cpp.git
+      uri: ((git_jwtcpp_url))
       branch: master
   - name: cpptoml
     type: git
     icon: git
     source:
-      uri: https://github.com/skystrife/cpptoml.git
+      uri: ((git_cpptoml_url))
       branch: master
   - name: qt-webassembly
     type: registry-image
@@ -90,7 +90,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/qt5-builder
+      repository: ((registry_username))/((container_builder))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest     
@@ -98,7 +98,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/pruefungsplaner-backend
+      repository: ((registry_username))/((container_backend))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -106,7 +106,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/pruefungsplaner-frontend
+      repository: ((registry_username))/((container_frontend))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -114,7 +114,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/pruefungsplaner-scheduler
+      repository: ((registry_username))/((container_scheduler))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -122,7 +122,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/pruefungsplaner-auth
+      repository: ((registry_username))/((container_auth))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest
@@ -130,7 +130,7 @@ resources:
     type: registry-image
     icon: docker
     source:
-      repository: ((registry_username))/pruefungsplaner-cli
+      repository: ((registry_username))/((container_cli))
       username: ((registry_username))
       password: ((registry_password))
       tag: latest 
