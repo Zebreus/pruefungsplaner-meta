@@ -1,6 +1,13 @@
 # pruefungsplaner-meta
 This project manages the parts of the pruefungsplaner
 
+## Application structure
+The pruefungsplaner consists of three services ([backend](https://github.com/Zebreus/pruefungsplaner-backend), [auth](https://github.com/Zebreus/pruefungsplaner-auth), [scheduler](https://github.com/Zebreus/pruefungsplaner-scheduler) )and the [frontend](https://github.com/Zebreus/pruefungsplaner). They communicate via jsonrpc an authenticate with signed json web tokens.
+
+There also is a [simple commandline client to retrieve scheduled plans from the backend](https://github.com/Zebreus/pruefungsplaner-cli).
+
+The definiton of the shared datamodel is stored in [a seperate repository](https://github.com/Zebreus/pruefungsplaner-datamodel)
+
 ## Running the application
 
 ### Start the prufungsplaner
@@ -92,6 +99,3 @@ The pipeline detects updates in git repos that are included as submodules in the
 
 ### Continous deployment
 The pipeline automatically produces and uploades docker containers to the tags specified in `credentials.yaml`.
-
-## Application structure
-The pruefungsplaner consists of three services and the frontend. They communicate via jsonrpc an authenticate with signed json web tokens
