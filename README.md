@@ -1,6 +1,42 @@
 # pruefungsplaner-meta
 This project manages the parts of the pruefungsplaner
 
+## Running the application
+
+### Start the prufungsplaner
+To start the pruefungsplaner just run
+```bash
+docker-compose up
+```
+This will start a webserver on (http://localhost:80) with the pruefungsplaner and all required services.
+
+You can add `-d` to that command to start in background.
+If you want to use an encrypted connection, try an reverse proxy like traefik.
+
+### Use the pruefungsplaner
+Visit (http://localhost:80) and use the interface.
+
+### Stop the pruefungsplaner
+Use
+```bash
+docker-compose down
+```
+to stop the pruefungsplaner.
+
+### Configuration options
+You can add commandline options to the services in the dockerfile.
+
+All pruefungsplaner services support a `--help` option to describe all available options. 
+```bash
+# Commands to list options for the services
+docker run --rm -it madmanfred/pruefungsplaner-backend --help
+docker run --rm -it madmanfred/pruefungsplaner-auth --help
+docker run --rm -it madmanfred/pruefungsplaner-scheduler --help
+```
+All options can also be set via a configuration file, a example for these is in the git repository for each service.
+
+The frontend can be configured with the URLs for the backend services via environment variables. See `docker-compose.yml` for an example.
+
 ## CI/CD pipeline
 CI/CD is done with [concourse](https://concourse-ci.org/).
 
