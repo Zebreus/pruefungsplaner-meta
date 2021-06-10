@@ -23,6 +23,19 @@ docker-compose down
 ```
 to stop the pruefungsplaner.
 
+### Persistent data
+By default all data is gone, when you down the docker container. To prevent this you can set the storage directory to your mounted working directory by adding `--storage /data` to the backend options in [docker-compose.yml](docker-compose.yml).
+
+### Initial data
+To load initial csv files that are in `./initialFiles` add `--initial-files /data/initialFiles` to the backend options.
+
+### Retrieve csv files
+You can retrieve the scheduled csv files with the cli, try for help
+
+```bash
+docker run --rm -it madmanfred/pruefungsplaner-cli --help
+```
+
 ### Configuration options
 You can add commandline options to the services in the dockerfile.
 
@@ -80,3 +93,5 @@ The pipeline detects updates in git repos that are included as submodules in the
 ### Continous deployment
 The pipeline automatically produces and uploades docker containers to the tags specified in `credentials.yaml`.
 
+## Application structure
+The pruefungsplaner consists of three services and the frontend. They communicate via jsonrpc an authenticate with signed json web tokens
