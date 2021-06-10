@@ -649,6 +649,74 @@ jobs:
       - put: pruefungsplaner-datamodel
         params:
           repository: pruefungsplaner-datamodel
+  - name: integrate-cpptoml-cli
+    disable_manual_trigger: true
+    serial_groups: [integrate-cli]
+    plan:
+      - get: cpptoml
+        trigger: true
+      - get: pruefungsplaner-cli
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: cpptoml
+          target: pruefungsplaner-cli
+        output_mapping:
+          updated-target: pruefungsplaner-cli
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-cli/concourse/task-test.yml
+      - put: pruefungsplaner-cli
+        params:
+          repository: pruefungsplaner-cli
+  - name: integrate-datamodel-cli
+    serial_groups: [integrate-cli]
+    disable_manual_trigger: true
+    plan:
+      - get: pruefungsplaner-datamodel
+        passed: [test-datamodel]
+        trigger: true
+      - get: pruefungsplaner-cli
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-datamodel
+          target: pruefungsplaner-cli
+        output_mapping:
+          updated-target: pruefungsplaner-cli
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-cli/concourse/task-test.yml
+      - put: pruefungsplaner-cli
+        params:
+          repository: pruefungsplaner-cli
+  - name: integrate-auth-cli
+    disable_manual_trigger: true
+    serial_groups: [integrate-cli]
+    plan:
+      - get: pruefungsplaner-auth
+        passed: [test-auth]
+        trigger: true
+      - get: pruefungsplaner-cli
+        trigger: true
+      - get: pruefungsplaner-meta
+      - task: create-commit
+        file: pruefungsplaner-meta/task-update-submodule.yml
+        input_mapping:
+          submodule: pruefungsplaner-auth
+          target: pruefungsplaner-cli
+        output_mapping:
+          updated-target: pruefungsplaner-cli
+      - task: run-tests
+        privileged: true
+        file: pruefungsplaner-cli/concourse/task-test.yml
+      - put: pruefungsplaner-cli
+        params:
+          repository: pruefungsplaner-cli
 
 groups:
 - name: build
@@ -684,6 +752,9 @@ groups:
   - integrate-jwt-cpp-auth
   - integrate-jsonrpc-auth
   - integrate-serialization-datamodel
+  - integrate-cpptoml-cli
+  - integrate-datamodel-cli
+  - integrate-auth-cli
 - name: meta
   jobs:
   - build-qt5-builder
